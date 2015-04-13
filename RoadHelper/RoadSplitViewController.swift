@@ -1,21 +1,19 @@
 //
-//  RoadInfoViewController.swift
+//  RoadSplitViewController.swift
 //  RoadHelper
 //
-//  Created by Eugene on 10/04/15.
+//  Created by Eugene on 13/04/15.
 //  Copyright (c) 2015 Eugene Antropov. All rights reserved.
 //
 
 import UIKit
 
-class RoadInfoViewController: UIViewController {
+class RoadSplitViewController: UISplitViewController {
     var road:Road?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        if let splitViewController = self.splitViewController as? RoadSplitViewController {
-            road = splitViewController.road
-        }
+
         // Do any additional setup after loading the view.
     }
 

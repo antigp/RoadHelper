@@ -1,19 +1,19 @@
 //
-//  GeoInfo.swift
+//  VoiceInfo.swift
 //  
 //
-//  Created by Eugene on 10/04/15.
+//  Created by Eugene on 13/04/15.
 //
 //
 
 import Foundation
 import CoreData
 
-class GeoInfo: NSManagedObject {
+class VoiceInfo: NSManagedObject {
 
-    @NSManaged var name: String
     @NSManaged var lat: NSNumber
     @NSManaged var lng: NSNumber
+    @NSManaged var recordedVoice: NSData
     @NSManaged var info: Info
 
 }

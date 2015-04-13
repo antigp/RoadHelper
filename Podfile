@@ -6,3 +6,5 @@ pod "ReactiveCocoa", "3.0-alpha.3"
 pod 'MagicalRecord', :git => 'https://github.com/magicalpanda/MagicalRecord', :branch => 'develop'
 pod 'YandexSpeechKit', '~> 2.2'
 pod 'FireBase', '~> 2.2'
+pod 'UIActionSheet+Blocks', '~> 0.9'
+pod 'Alamofire', '~> 1.2'

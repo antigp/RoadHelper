@@ -2,7 +2,7 @@
 //  Road.swift
 //  
 //
-//  Created by Eugene on 10/04/15.
+//  Created by Eugene on 13/04/15.
 //
 //
 
@@ -13,6 +13,6 @@ class Road: NSManagedObject {
 
     @NSManaged var name: String
     @NSManaged var totalKLM: NSNumber
-    @NSManaged var infos: NSSet
+    @NSManaged var klms: NSSet
 
 }
