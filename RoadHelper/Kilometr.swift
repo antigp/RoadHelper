@@ -2,7 +2,7 @@
 //  Kilometr.swift
 //  
 //
-//  Created by Eugene on 13/04/15.
+//  Created by Eugene on 14/04/15.
 //
 //
 
@@ -14,5 +14,6 @@ class Kilometr: NSManagedObject {
     @NSManaged var klm: NSNumber
     @NSManaged var infos: NSSet
     @NSManaged var road: Road
+    @NSManaged var voices: NSSet
 
 }

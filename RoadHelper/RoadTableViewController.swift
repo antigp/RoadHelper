@@ -9,7 +9,7 @@
 import UIKit
 import MagicalRecord
 
-class RoadTableViewController: UITableViewController, NSFetchedResultsControllerDelegate {
+class RoadTableViewController: UITableViewController, NSFetchedResultsControllerDelegate,UISplitViewControllerDelegate {
     var road:Road? {
         didSet{
             if let road = self.road{
@@ -26,6 +26,8 @@ class RoadTableViewController: UITableViewController, NSFetchedResultsController
         if let splitViewController = self.splitViewController as? RoadSplitViewController {
             road = splitViewController.road
         }
+        splitViewController?.delegate = self
+        
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
@@ -80,6 +82,28 @@ class RoadTableViewController: UITableViewController, NSFetchedResultsController
     }
     
     @IBAction func addButtonPressed(){
+        
+    }
+    
+    func controllerDidChangeContent(controller: NSFetchedResultsController) {
+        self.tableView.reloadData()
+    }
+    
+    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        switch(indexPath.section){
+        case 1:
+            let newIndexPath = NSIndexPath(forItem: indexPath.item, inSection: 0)
+            if let roadInfo = fetchedController?.objectAtIndexPath(newIndexPath) as? Kilometr {
+                if let infoListViewController = self.storyboard?.instantiateViewControllerWithIdentifier("RoadInfoListNavigationViewController") as? UINavigationController {
+                    if let viewController = infoListViewController.viewControllers.first as? RoadInfoListTableViewController {
+                        viewController.klm = roadInfo
+                        splitViewController?.showDetailViewController(infoListViewController, sender: nil)
+                    }
+                }
+            }
+        default:
+            println()
+        }
         
     }
     

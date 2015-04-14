@@ -9,9 +9,11 @@
 import UIKit
 import ReactiveCocoa
 import Alamofire
+import CoreLocation
 
 class GeoNameSearchTableViewController: UITableViewController,UISearchControllerDelegate {
     @IBOutlet weak var searchBarView:UISearchBar!
+    var finishBlock:((String,(CLLocationCoordinate2D,CLLocationCoordinate2D)?)->Void)?
     
     var textString = MutableProperty("")
     var searchArray = MutableProperty(Array<Dictionary<String, AnyObject>>())
@@ -30,121 +32,121 @@ class GeoNameSearchTableViewController: UITableViewController,UISearchController
                             return GeoNameSearchTableViewController.searchSignal(object)
                         })
         
-        
-//        searchArray |> next(next:{[weak self] (object) in
-//            self?.searchDisplayController?.searchResultsTableView.reloadData()
-//            return
-//        })
+        searchArray.producer
+            |> start (next: {[weak self] value in
+                self?.searchDisplayController?.searchResultsTableView.reloadData()
+            })
         
         self.searchDisplayController?.searchResultsTableView.registerClass(GeoSearchResultTableViewCell.self, forCellReuseIdentifier: "GeoSearchResultTableViewCell")
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        searchBarView.becomeFirstResponder()
     }
+    
 
     // MARK: - Table view data source
 
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        // #warning Potentially incomplete method implementation.
-        // Return the number of sections.
-        return 1
+        return 2
     }
 
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete method implementation.
-        // Return the number of rows in the section.
-        return searchArray.value.count
-    }
-
-    class func searchSignal(testString:String) -> SignalProducer<Array<Dictionary<String,AnyObject>>, NoError>{
-        let signal:SignalProducer<Array<Dictionary<String,AnyObject>>, NSError> = SignalProducer { observer, disposable in
-                if let urlString = NSURL(string: "http://geocode-maps.yandex.ru/1.x/") {
-                    request(.GET, urlString, parameters: ["ll":"37.618920,55.756994", "geocode": testString,"format":"json"]).responseJSON(completionHandler: { (request, response, object, error) -> Void in
-                        if let json = object as? Dictionary<String, AnyObject>{
-                            if let members = (json["response"]?["GeoObjectCollection"] as? Dictionary<String, AnyObject>)?["featureMember"] as? Array<Dictionary<String, AnyObject>>{
-                                sendNext(observer, members)
-                            }
-                        }
-                        if let error = error{
-                            sendError(observer,error)
-                        }
-                        sendCompleted(observer)
-                    })
-                }
-                else{
-                    sendCompleted(observer)
-                    sendError(observer, NSError(domain: "yandex.json", code: 500, userInfo: nil))
-                }
-            }
-        return signal |> catch { _ in SignalProducer<Array<Dictionary<String,AnyObject>>, NoError>.empty }
+        switch(section){
+        case 0:
+            return 1
+        case 1:
+            return searchArray.value.count
+        default:
+            return 0
+        }
     }
     
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        if searchArray.value.count > indexPath.row{
-            let object = searchArray.value[indexPath.row]
-            let cell = tableView.dequeueReusableCellWithIdentifier("GeoSearchResultTableViewCell", forIndexPath: indexPath) as! GeoSearchResultTableViewCell
-            if let geoObject = object["GeoObject"] as? Dictionary<String, AnyObject>{
-                if let name = geoObject["name"] as? String {
-                    cell.textLabel?.text = name
-                }
-                if let description = geoObject["description"] as? String {
-                    cell.detailTextLabel?.text = description
-                }
-            }
-            // Configure the cell...
-            
+        switch(indexPath.section){
+        case 0:
+            let cell = UITableViewCell()
+            cell.textLabel?.text = "Without geo: '\(textString.value)'"
             return cell
+        case 1:
+            if searchArray.value.count > indexPath.row{
+                let object = searchArray.value[indexPath.row]
+                let cell = tableView.dequeueReusableCellWithIdentifier("GeoSearchResultTableViewCell", forIndexPath: indexPath) as! GeoSearchResultTableViewCell
+                if let geoObject = object["GeoObject"] as? Dictionary<String, AnyObject>{
+                    if let name = geoObject["name"] as? String {
+                        cell.textLabel?.text = name
+                    }
+                    if let description = geoObject["description"] as? String {
+                        cell.detailTextLabel?.text = description
+                    }
+                }
+                // Configure the cell...
+                
+                return cell
+            }
+        default:
+            return UITableViewCell()
         }
         return UITableViewCell()
     }
 
-
-    /*
-    // Override to support conditional editing of the table view.
-    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-        // Return NO if you do not want the specified item to be editable.
-        return true
+    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        switch(indexPath.section){
+        case 0:
+            finishBlock?(textString.value, nil)
+        case 1:
+            if searchArray.value.count > indexPath.row{
+                let object = searchArray.value[indexPath.row]
+                if let geoObject = object["GeoObject"] as? Dictionary<String, AnyObject>{
+                    if let name = geoObject["name"] as? String,
+                           lowerCornerString = ((geoObject["boundedBy"] as? Dictionary<String,AnyObject>)?["Envelope"] as? Dictionary<String,AnyObject>)?["lowerCorner"] as? String,
+                           upperCornerString = ((geoObject["boundedBy"] as? Dictionary<String,AnyObject>)?["Envelope"] as? Dictionary<String,AnyObject>)?["upperCorner"] as? String {
+                                let lowerCornerComponent = lowerCornerString.componentsSeparatedByString(" ")
+                                let upperCornerComponent = upperCornerString.componentsSeparatedByString(" ")
+                                let numberFormater = NSNumberFormatter()
+                                numberFormater.decimalSeparator = "."
+                                if let  lowerCornerLat =  numberFormater.numberFromString(lowerCornerComponent[0])?.doubleValue,
+                                        lowerCornerLon =  numberFormater.numberFromString(lowerCornerComponent[1])?.doubleValue,
+                                        upperCornerLat =  numberFormater.numberFromString(upperCornerComponent[0])?.doubleValue,
+                                        upperCornerLon =  numberFormater.numberFromString(upperCornerComponent[1])?.doubleValue {
+                                            let lowerCorner = CLLocationCoordinate2D(latitude: lowerCornerLat, longitude: lowerCornerLon)
+                                            let upperCorner = CLLocationCoordinate2D(latitude: upperCornerLat, longitude: upperCornerLon)
+                                            finishBlock?(name, (lowerCorner,upperCorner))
+                                            return
+                                }
+                            
+                    }
+                    finishBlock?(textString.value, nil)
+                    return
+                }
+            }
+        default:
+            assert(false,"Unknow handler")
+        }
     }
-    */
 
-    /*
-    // Override to support editing the table view.
-    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        if editingStyle == .Delete {
-            // Delete the row from the data source
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-        } else if editingStyle == .Insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
+    class func searchSignal(testString:String) -> SignalProducer<Array<Dictionary<String,AnyObject>>, NoError>{
+        let signal:SignalProducer<Array<Dictionary<String,AnyObject>>, NSError> = SignalProducer { observer, disposable in
+            if let urlString = NSURL(string: "http://geocode-maps.yandex.ru/1.x/") {
+                request(.GET, urlString, parameters: ["ll":"37.618920,55.756994", "geocode": testString,"format":"json"]).responseJSON(completionHandler: { (request, response, object, error) -> Void in
+                    if let json = object as? Dictionary<String, AnyObject>{
+                        if let members = (json["response"]?["GeoObjectCollection"] as? Dictionary<String, AnyObject>)?["featureMember"] as? Array<Dictionary<String, AnyObject>>{
+                            sendNext(observer, members)
+                        }
+                    }
+                    if let error = error{
+                        sendError(observer,error)
+                    }
+                    sendCompleted(observer)
+                })
+            }
+            else{
+                sendCompleted(observer)
+                sendError(observer, NSError(domain: "yandex.json", code: 500, userInfo: nil))
+            }
+        }
+        return signal |> catch { _ in SignalProducer<Array<Dictionary<String,AnyObject>>, NoError>.empty }
     }
-    */
-
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(tableView: UITableView, moveRowAtIndexPath fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath) {
-
-    }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-        // Return NO if you do not want the item to be re-orderable.
-        return true
-    }
-    */
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using [segue destinationViewController].
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }

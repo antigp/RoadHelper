@@ -2,7 +2,7 @@
 //  VoiceInfo.swift
 //  
 //
-//  Created by Eugene on 13/04/15.
+//  Created by Eugene on 14/04/15.
 //
 //
 
@@ -14,6 +14,6 @@ class VoiceInfo: NSManagedObject {
     @NSManaged var lat: NSNumber
     @NSManaged var lng: NSNumber
     @NSManaged var recordedVoice: NSData
-    @NSManaged var info: Info
+    @NSManaged var klm: Kilometr
 
 }
