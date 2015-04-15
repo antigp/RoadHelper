@@ -109,7 +109,7 @@ class GeoNameSearchTableViewController: UITableViewController,UISearchController
                                                     let spanLat = maxLat - minLat
                                                     let spanLon = maxLon - minLon
                                                     let rect = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: minLat+(spanLat/2), longitude: minLon+(spanLon/2)), span: MKCoordinateSpan(latitudeDelta: spanLat, longitudeDelta: spanLon))
-                                                    let distance = LocationManager.calculateDistanceBetwen(rect, point: point)
+                                                    let distance = LocationManager.calculateDistanceBetwen(rect: rect, userPoint: point)
                                                     return "\(Int(distance))m"
                                                     
                                                 }

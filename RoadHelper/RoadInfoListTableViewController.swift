@@ -9,8 +9,9 @@
 import UIKit
 import MagicalRecord
 import ReactiveCocoa
+import AVFoundation
 
-class RoadInfoListTableViewController: UITableViewController,NSFetchedResultsControllerDelegate {
+class RoadInfoListTableViewController: UITableViewController,NSFetchedResultsControllerDelegate,AVAudioRecorderDelegate,AVAudioPlayerDelegate {
     var klm:Kilometr?{
         didSet{
             if let klm = self.klm{
@@ -20,26 +21,36 @@ class RoadInfoListTableViewController: UITableViewController,NSFetchedResultsCon
             }
         }
     }
+    lazy var recordFile:NSURL = {
+        let documentPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as! String
+        return NSURL(fileURLWithPath: documentPath.stringByAppendingString("/sound.caf"))!
+        }()
+    lazy var avAudioRecorder:AVAudioRecorder = {
+        var error:NSError?
+        let settings = [
+            AVFormatIDKey: kAudioFormatAppleLossless,
+            AVEncoderAudioQualityKey : AVAudioQuality.Max.rawValue,
+            AVNumberOfChannelsKey: 1,
+            AVSampleRateKey : 44100.0] as [NSObject: AnyObject]
+        let recorder = AVAudioRecorder(URL: self.recordFile, settings: settings, error: &error)
+        recorder.delegate = self
+        if let error = error{
+            NSLog("%@",error)
+        }
+        return recorder
+    }()
     
+    var voicePlayer:AVAudioPlayer?
     var fetchedController:NSFetchedResultsController?
-    
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-//        navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem()
-//        navigationItem.leftItemsSupplementBackButton = true
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem()
+        self.navigationItem.rightBarButtonItem = self.editButtonItem()
+        tableView.estimatedRowHeight = 65.0;
+        tableView.rowHeight = UITableViewAutomaticDimension;
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
+    
+    
     // MARK: - Table view data source
 
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
@@ -72,7 +83,7 @@ class RoadInfoListTableViewController: UITableViewController,NSFetchedResultsCon
                             let spanLat = maxLat - minLat
                             let spanLon = maxLon - minLon
                             let rect = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: minLat+(spanLat/2), longitude: minLon+(spanLon/2)), span: MKCoordinateSpan(latitudeDelta: spanLat, longitudeDelta: spanLon))
-                            let distance = LocationManager.calculateDistanceBetwen(rect, point: point)
+                            let distance = LocationManager.calculateDistanceBetwen(rect: rect, userPoint: point)
                             return "\(Int(distance))m"
                         }
                     }
@@ -82,6 +93,23 @@ class RoadInfoListTableViewController: UITableViewController,NSFetchedResultsCon
                 |> start(next:{ (object:String) in
                     cell.infoBoxDest.text = object
                 })
+            LocationManager.instance().lastLocation.producer
+                |> map({ object -> String in
+                    if let userPoint = object {
+                        if let  lat = info.lat?.doubleValue,
+                                lon = info.lon?.doubleValue
+                        {
+                            let point = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+                            let distance = LocationManager.calculateDistanceBetwen(point: point, userPoint: userPoint)
+                            return "\(Int(distance))m"
+                        }
+                    }
+                    return ""
+                })
+                |> takeUntil(cellReuseSignal)
+                |> start(next:{ (object:String) in
+                    cell.infoPointDest.text = object
+                })
             
             return cell
         }
@@ -90,27 +118,46 @@ class RoadInfoListTableViewController: UITableViewController,NSFetchedResultsCon
         }
     }
 
+    
+    func controllerDidChangeContent(controller: NSFetchedResultsController) {
+        self.tableView.reloadData()
+    }
 
-
-    /*
+    
     // Override to support editing the table view.
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
         if editingStyle == .Delete {
-            // Delete the row from the data source
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-        } else if editingStyle == .Insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
+            MagicalRecord.saveWithBlock({[weak self] (context) -> Void in
+                if let object = self?.fetchedController?.objectAtIndexPath(indexPath) as? Info{
+                    object.MR_deleteEntityInContext(context)
+                }
+            })
+        }  
     }
-    */
 
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(tableView: UITableView, moveRowAtIndexPath fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath) {
 
+
+    override func tableView(tableView: UITableView, moveRowAtIndexPath sourceIndexPath: NSIndexPath, toIndexPath destinationIndexPath: NSIndexPath) {
+        if let object = self.fetchedController?.objectAtIndexPath(sourceIndexPath) as? Info, allObjects = self.fetchedController?.fetchedObjects as? [Info] {
+            var resultArray = allObjects
+            resultArray.removeAtIndex(find(resultArray,object)!)
+            resultArray.insert(object, atIndex: destinationIndexPath.row)
+            var i:Int64 = 1
+            
+            let saveFunction:(sortIndex:Int64, object:Info)->Void =
+                {(i,object) -> Void in
+                    MagicalRecord.saveWithBlock {(context) -> Void in
+                        let contextObject = object.MR_inContext(context)
+                        contextObject.sort = NSNumber(longLong:i)
+                    }
+                }
+            
+            for object in resultArray{
+                saveFunction(sortIndex: i, object: object)
+                i++
+            }
+        }
     }
-    */
-
 
     // Override to support conditional rearranging of the table view.
     override func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: NSIndexPath) -> Bool {
@@ -118,15 +165,64 @@ class RoadInfoListTableViewController: UITableViewController,NSFetchedResultsCon
         return true
     }
 
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using [segue destinationViewController].
-        // Pass the selected object to the new view controller.
+    @IBAction func startRecordVoice(){
+        AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryRecord, error: nil)
+        avAudioRecorder.record()
     }
-    */
-
+    
+    @IBAction func stopRecordVoice(){
+        avAudioRecorder.stop()
+         AVAudioSession.sharedInstance().setCategory(nil, error: nil)
+    }
+    
+    func audioRecorderDidFinishRecording(recorder: AVAudioRecorder!, successfully flag: Bool) {
+        var error:NSError?
+        if let avAudioPlayer = AVAudioPlayer(contentsOfURL: recordFile, error: &error){
+            let duration = avAudioPlayer.duration
+            MagicalRecord.saveWithBlock({[weak self] (context) -> Void in
+                if let kilometer = self?.klm?.MR_inContext(context) {
+                    let info = Info.MR_createEntityInContext(context)
+                    info.klm = kilometer
+                    let nsDateFormater = NSDateFormatter()
+                    nsDateFormater.dateStyle = NSDateFormatterStyle.ShortStyle
+                    nsDateFormater.timeStyle = NSDateFormatterStyle.MediumStyle
+                    info.name = "\(nsDateFormater.stringFromDate(NSDate()))"
+                    info.descr = "Voice record : \(duration) sec"
+                    let predicateSort = NSPredicate(format: "klm = %@", argumentArray: [kilometer])
+                    if let maxSortInfo = Info.MR_findFirstWithPredicate(predicateSort, sortedBy: "sort", ascending: false) {
+                        info.sort = NSNumber(long: maxSortInfo.sort.longValue + 1)
+                    }
+                    if let userLocation = LocationManager.instance().lastLocation.value?.coordinate {
+                        info.lat = userLocation.latitude
+                        info.lon = userLocation.longitude
+                    }
+                    if let recordFile = self?.recordFile{
+                        let userVoice = VoiceInfo.MR_createEntityInContext(context)
+                        userVoice.info = info
+                        userVoice.recordedVoice = NSData(contentsOfURL: recordFile)
+                    }
+                }
+                })
+        }
+        else{
+            NSLog("%@",error!)
+        }
+    }
+    
+    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        if let info = fetchedController?.objectAtIndexPath(indexPath) as? Info {
+            if let voiceInfo = info.voice {
+                voicePlayer?.stop()
+                AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback, error: nil)
+                voicePlayer = AVAudioPlayer(data: voiceInfo.recordedVoice, error: nil)
+                voicePlayer?.delegate = self
+                voicePlayer?.play()
+            }
+        }
+    }
+    
+    func audioPlayerDidFinishPlaying(player: AVAudioPlayer!, successfully flag: Bool) {
+        voicePlayer?.stop()
+        AVAudioSession.sharedInstance().setCategory(nil, error: nil)
+    }
 }

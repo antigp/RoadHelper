@@ -8,13 +8,21 @@
 
 import UIKit
 import MagicalRecord
+import ReactiveCocoa
 
 class RoadTableViewController: UITableViewController, NSFetchedResultsControllerDelegate,UISplitViewControllerDelegate {
     var road:Road? {
         didSet{
             if let road = self.road{
-                let predicate = NSPredicate(format: "road = %@", argumentArray: [road])
-                self.fetchedController = Kilometr.MR_fetchAllSortedBy("klm", ascending: true, withPredicate: predicate, groupBy: nil, delegate: self)
+                let predicate = NSPredicate(format: "klm.road = %@", argumentArray: [road])
+                let fetchRequest = NSFetchRequest(entityName: "Info")
+                fetchRequest.predicate = predicate
+                let sortDescriptor1 = NSSortDescriptor(key: "klm.klm", ascending: true)
+                let sortDescriptor2 = NSSortDescriptor(key: "sort", ascending: true)
+                fetchRequest.sortDescriptors = [sortDescriptor1,sortDescriptor2]
+                self.fetchedController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: NSManagedObjectContext.MR_defaultContext(), sectionNameKeyPath: "klm.klm", cacheName: nil)
+                self.fetchedController?.delegate = self
+                self.fetchedController?.performFetch(nil)
                 self.tableView.reloadData()
             }
         }
@@ -49,7 +57,7 @@ class RoadTableViewController: UITableViewController, NSFetchedResultsController
             case 0:
                 return 1
             case 1:
-                return (fetchedController?.sections?[0] as? NSFetchedResultsSectionInfo)?.numberOfObjects ?? 0
+                return fetchedController?.sections?.count ?? 0
             default:
                 return 0
         }
@@ -63,10 +71,60 @@ class RoadTableViewController: UITableViewController, NSFetchedResultsController
             cell.routeName.text = self.road?.name ?? "Road name"
             return cell
         case 1:
-            let newIndexPath = NSIndexPath(forItem: indexPath.item, inSection: 0)
-            if let roadInfo = fetchedController?.objectAtIndexPath(newIndexPath) as? Kilometr {
+            let newIndexPath = NSIndexPath(forItem: 0, inSection: indexPath.item)
+            if let roadInfo = fetchedController?.objectAtIndexPath(newIndexPath) as? Info {
                 let cell = tableView.dequeueReusableCellWithIdentifier("RoadInfoTableViewCell", forIndexPath: indexPath) as! RoadInfoTableViewCell
-                cell.routeKilometerLabel.text = "\(roadInfo.klm) klm."
+                cell.routeKilometerLabel.text = "\(roadInfo.klm.klm) klm."
+                cell.totalInfo.text = "\(roadInfo.klm.infos.count)"
+                if let allInfosArray = roadInfo.klm.infos.allObjects as? [Info] {
+                    cell.infoWithGeoRect.text = "\(allInfosArray.filter({$0.minLat != nil}).count)"
+                    cell.infoWithGeoPoint.text = "\(allInfosArray.filter({$0.lat != nil}).count)"
+                    cell.infoWithPhoto.text = "\(allInfosArray.filter({$0.voice != nil}).count)"
+                }
+                cell.firstInfoName.text = "\(roadInfo.name)"
+                let cellReuseSignal = cell.rac_prepareForReuseSignal.toSignalProducer()
+                    |> map{ object -> () in
+                        return
+                    }
+                    |> catch { _ in SignalProducer<(), NoError>.empty }
+                LocationManager.instance().lastLocation.producer
+                    |> map({ object -> String in
+                        if let point = object {
+                            if let  maxLat = roadInfo.maxLat?.doubleValue,
+                                    minLat = roadInfo.minLat?.doubleValue,
+                                    maxLon = roadInfo.maxLon?.doubleValue,
+                                    minLon = roadInfo.minLon?.doubleValue
+                                {
+                                    let spanLat = maxLat - minLat
+                                    let spanLon = maxLon - minLon
+                                    let rect = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: minLat+(spanLat/2), longitude: minLon+(spanLon/2)), span: MKCoordinateSpan(latitudeDelta: spanLat, longitudeDelta: spanLon))
+                                    let distance = LocationManager.calculateDistanceBetwen(rect: rect, userPoint: point)
+                                    return "\(Int(distance))m"
+                                }
+                        }
+                        return ""
+                    })
+                    |> takeUntil(cellReuseSignal)
+                    |> start(next:{ (object:String) in
+                        cell.firstInfoRectDistance.text = object
+                    })
+                LocationManager.instance().lastLocation.producer
+                    |> map({ object -> String in
+                        if let userPoint = object {
+                            if let  lat = roadInfo.lat?.doubleValue,
+                                    lon = roadInfo.lon?.doubleValue
+                            {
+                                let point = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+                                let distance = LocationManager.calculateDistanceBetwen(point: point, userPoint: userPoint)
+                                return "\(Int(distance))m"
+                            }
+                        }
+                        return ""
+                    })
+                    |> takeUntil(cellReuseSignal)
+                    |> start(next:{ (object:String) in
+                        cell.firstInfoPointDistance.text = object
+                    })
                 return cell
             }
         default:
@@ -80,9 +138,6 @@ class RoadTableViewController: UITableViewController, NSFetchedResultsController
         self.splitViewController?.dismissViewControllerAnimated(true, completion: nil)
     }
     
-    @IBAction func addButtonPressed(){
-        
-    }
     
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
         self.tableView.reloadData()
@@ -91,11 +146,11 @@ class RoadTableViewController: UITableViewController, NSFetchedResultsController
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         switch(indexPath.section){
         case 1:
-            let newIndexPath = NSIndexPath(forItem: indexPath.item, inSection: 0)
-            if let roadInfo = fetchedController?.objectAtIndexPath(newIndexPath) as? Kilometr {
+            let newIndexPath = NSIndexPath(forItem: 0, inSection: indexPath.item)
+            if let roadInfo = fetchedController?.objectAtIndexPath(newIndexPath) as? Info {
                 if let infoListViewController = self.storyboard?.instantiateViewControllerWithIdentifier("RoadInfoListNavigationViewController") as? UINavigationController {
                     if let viewController = infoListViewController.viewControllers.first as? RoadInfoListTableViewController {
-                        viewController.klm = roadInfo
+                        viewController.klm = roadInfo.klm
                         splitViewController?.showDetailViewController(infoListViewController, sender: nil)
                     }
                 }

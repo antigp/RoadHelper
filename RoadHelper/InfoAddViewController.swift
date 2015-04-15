@@ -108,6 +108,21 @@ class InfoAddViewController: UIViewController,UIPickerViewDelegate, UIPickerView
                 showMapRectViewController.mapRect = rect
             }
         }
+        if let addGeoViewController = segue.destinationViewController as? AddGeoViewController{
+            if let boundingBox = self.boundingBox.value {
+                let maxLat = boundingBox.1.latitude
+                let minLat = boundingBox.0.latitude
+                let maxLon = boundingBox.1.longitude
+                let minLon = boundingBox.0.longitude
+                let spanLat = maxLat - minLat
+                let spanLon = maxLon - minLon
+                let rect = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: minLat+(spanLat/2), longitude: minLon+(spanLon/2)), span: MKCoordinateSpan(latitudeDelta: spanLat, longitudeDelta: spanLon))
+                addGeoViewController.mapRect = rect
+                addGeoViewController.finishBlock = {[weak self] coordinate in
+                    self?.geoPoint.value = coordinate
+                }
+            }
+        }
     }
     
     func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -> Bool {
@@ -121,6 +136,8 @@ class InfoAddViewController: UIViewController,UIPickerViewDelegate, UIPickerView
     @IBAction func doneButtonPressed(){
         MagicalRecord.saveWithBlock({[weak self] (context) -> Void in
             if let road = self?.road?.MR_inContext(context) {
+                
+                
                 let info = Info.MR_createEntityInContext(context)
                 let kilometer:Kilometr
                 let predicate = NSPredicate(format: "klm = %@ AND road = %@", argumentArray: [NSNumber(long: self?.klmPicker.selectedRowInComponent(0) ?? 0), road])
@@ -132,6 +149,10 @@ class InfoAddViewController: UIViewController,UIPickerViewDelegate, UIPickerView
                     kilometer.road = road
                     kilometer.klm = NSNumber(long: self?.klmPicker.selectedRowInComponent(0) ?? 0)
                 }
+                let predicateSort = NSPredicate(format: "klm = %@", argumentArray: [kilometer])
+                if let maxSortInfo = Info.MR_findFirstWithPredicate(predicateSort, sortedBy: "sort", ascending: false) {
+                    info.sort = NSNumber(long: maxSortInfo.sort.longValue + 1)
+                }
                 info.klm = kilometer
                 info.name = self?.name.value ?? "Name"
                 info.descr = self?.descrView.text ?? ""
@@ -140,6 +161,10 @@ class InfoAddViewController: UIViewController,UIPickerViewDelegate, UIPickerView
                     info.minLon = boundingBox.0.longitude
                     info.maxLat = boundingBox.1.latitude
                     info.maxLon = boundingBox.1.longitude
+                }
+                if let geoPoint = self?.geoPoint.value {
+                    info.lat = geoPoint.latitude
+                    info.lon = geoPoint.longitude
                 }
             }
         }, completion:{[weak self](success,error) in

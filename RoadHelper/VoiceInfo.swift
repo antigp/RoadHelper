@@ -10,10 +10,7 @@ import Foundation
 import CoreData
 
 class VoiceInfo: NSManagedObject {
-
-    @NSManaged var lat: NSNumber
-    @NSManaged var lng: NSNumber
-    @NSManaged var recordedVoice: NSData
-    @NSManaged var klm: Kilometr
+    @NSManaged var recordedVoice: NSData?
+    @NSManaged var info: Info
 
 }
