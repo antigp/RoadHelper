@@ -9,6 +9,7 @@
 import UIKit
 import CoreData
 import MagicalRecord
+import Crashlytics
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -18,9 +19,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         MagicalRecord.setLoggingLevel(MagicalRecordLoggingLevel.Verbose)
-        MagicalRecord.setShouldDeleteStoreOnModelMismatch(true)
+        //MagicalRecord.setShouldDeleteStoreOnModelMismatch(true)
         MagicalRecord.setupAutoMigratingCoreDataStack()
         LocationManager.instance().askForLocationAccess()
+        Crashlytics.startWithAPIKey("d1f5c2c3d0b46040deee4746629a01f2ca07d05d")
         return true
     }
 
