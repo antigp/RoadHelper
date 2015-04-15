@@ -26,8 +26,8 @@ class RoadInfoListTableViewController: UITableViewController,NSFetchedResultsCon
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem()
-        navigationItem.leftItemsSupplementBackButton = true
+//        navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem()
+//        navigationItem.leftItemsSupplementBackButton = true
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
@@ -63,7 +63,20 @@ class RoadInfoListTableViewController: UITableViewController,NSFetchedResultsCon
                                     |> catch { _ in SignalProducer<(), NoError>.empty }
             LocationManager.instance().lastLocation.producer
                 |> map({ object -> String in
-                    return "Far"
+                    if let point = object {
+                        if let  maxLat = info.maxLat?.doubleValue,
+                                minLat = info.minLat?.doubleValue,
+                                maxLon = info.maxLon?.doubleValue,
+                                minLon = info.minLon?.doubleValue
+                        {
+                            let spanLat = maxLat - minLat
+                            let spanLon = maxLon - minLon
+                            let rect = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: minLat+(spanLat/2), longitude: minLon+(spanLon/2)), span: MKCoordinateSpan(latitudeDelta: spanLat, longitudeDelta: spanLon))
+                            let distance = LocationManager.calculateDistanceBetwen(rect, point: point)
+                            return "\(Int(distance))m"
+                        }
+                    }
+                    return ""
                 })
                 |> takeUntil(cellReuseSignal)
                 |> start(next:{ (object:String) in
@@ -78,13 +91,6 @@ class RoadInfoListTableViewController: UITableViewController,NSFetchedResultsCon
     }
 
 
-    /*
-    // Override to support conditional editing of the table view.
-    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
-        // Return NO if you do not want the specified item to be editable.
-        return true
-    }
-    */
 
     /*
     // Override to support editing the table view.

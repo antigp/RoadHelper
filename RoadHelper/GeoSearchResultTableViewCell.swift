@@ -10,7 +10,9 @@ import UIKit
 
 class GeoSearchResultTableViewCell: UITableViewCell {
     @IBOutlet weak var nameLabel:UILabel!
+    @IBOutlet weak var distanceLabel:UILabel!
     @IBOutlet weak var descrLabel:UILabel!
+    @IBOutlet weak var button:UIButton!
     
     override func awakeFromNib() {
         super.awakeFromNib()

@@ -2,10 +2,10 @@
 <model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="7549" systemVersion="14D131" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
     <entity name="Info" representedClassName="RoadHelper.Info" syncable="YES">
         <attribute name="descr" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="maxLat" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
-        <attribute name="maxLon" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
-        <attribute name="minLat" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
-        <attribute name="minLon" optional="YES" attributeType="Float" defaultValueString="0.0" syncable="YES"/>
+        <attribute name="maxLat" optional="YES" attributeType="Float" syncable="YES"/>
+        <attribute name="maxLon" optional="YES" attributeType="Float" syncable="YES"/>
+        <attribute name="minLat" optional="YES" attributeType="Float" syncable="YES"/>
+        <attribute name="minLon" optional="YES" attributeType="Float" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="sort" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
         <relationship name="klm" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Kilometr" inverseName="infos" inverseEntity="Kilometr" syncable="YES"/>

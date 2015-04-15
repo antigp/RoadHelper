@@ -14,11 +14,12 @@ import MagicalRecord
 class InfoAddViewController: UIViewController,UIPickerViewDelegate, UIPickerViewDataSource, UITextViewDelegate {
     var road:Road?
     var name = MutableProperty("")
-    var boundingBox:(CLLocationCoordinate2D,CLLocationCoordinate2D)?
+    var boundingBox = MutableProperty(Optional<(CLLocationCoordinate2D,CLLocationCoordinate2D)>.None)
     var geoPoint = MutableProperty(Optional<CLLocationCoordinate2D>.None)
     var image = MutableProperty(Optional<UIImage>.None)
     
     @IBOutlet weak var nameButton:UIButton!
+    @IBOutlet weak var showRectButton:UIButton!
     @IBOutlet weak var geoButton:UIButton!
     @IBOutlet weak var imageButton:UIButton!
     @IBOutlet weak var descrView:UITextView!
@@ -30,7 +31,7 @@ class InfoAddViewController: UIViewController,UIPickerViewDelegate, UIPickerView
         if let splitViewController = self.splitViewController as? RoadSplitViewController {
             road = splitViewController.road
         }
-        MKCoordinateRegion
+        
         name.producer
             |> map({ object -> String in
                 return object != "" ? object ?? "Name" : "Name"
@@ -38,6 +39,7 @@ class InfoAddViewController: UIViewController,UIPickerViewDelegate, UIPickerView
             |> start(next:{[weak self] (object:String) in
                 self?.nameButton.setTitle(object, forState: UIControlState.Normal)
             })
+        
         geoPoint.producer
             |> map({ object -> String in
                 if let coordinate = object {
@@ -50,9 +52,20 @@ class InfoAddViewController: UIViewController,UIPickerViewDelegate, UIPickerView
             |> start(next:{[weak self] (object:String) in
                 self?.geoButton.setTitle(object, forState: UIControlState.Normal)
             })
+        
         image.producer
             |> start(next:{[weak self] object in
                 self?.imageButton.setImage(object, forState: UIControlState.Normal)
+            })
+        
+        boundingBox.producer
+            |> start(next:{[weak self] object in
+                if let box = object{
+                    self?.showRectButton.hidden = false
+                }
+                else{
+                    self?.showRectButton.hidden = true
+                }
             })
         // Do any additional setup after loading the view.
     }
@@ -79,8 +92,20 @@ class InfoAddViewController: UIViewController,UIPickerViewDelegate, UIPickerView
         if let geoNameSearch = segue.destinationViewController as? GeoNameSearchTableViewController{
             geoNameSearch.finishBlock = {[weak self] (object,box) in
                 self?.name.value = object
-                self?.boundingBox = box
+                self?.boundingBox.value = box
                 geoNameSearch.navigationController?.popViewControllerAnimated(true)
+            }
+        }
+        if let showMapRectViewController = segue.destinationViewController as? ShowMapRectViewController{
+            if let boundingBox = self.boundingBox.value {
+                let maxLat = boundingBox.1.latitude
+                let minLat = boundingBox.0.latitude
+                let maxLon = boundingBox.1.longitude
+                let minLon = boundingBox.0.longitude
+                let spanLat = maxLat - minLat
+                let spanLon = maxLon - minLon
+                let rect = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: minLat+(spanLat/2), longitude: minLon+(spanLon/2)), span: MKCoordinateSpan(latitudeDelta: spanLat, longitudeDelta: spanLon))
+                showMapRectViewController.mapRect = rect
             }
         }
     }
@@ -110,7 +135,7 @@ class InfoAddViewController: UIViewController,UIPickerViewDelegate, UIPickerView
                 info.klm = kilometer
                 info.name = self?.name.value ?? "Name"
                 info.descr = self?.descrView.text ?? ""
-                if let boundingBox = self?.boundingBox {
+                if let boundingBox = self?.boundingBox.value {
                     info.minLat = boundingBox.0.latitude
                     info.minLon = boundingBox.0.longitude
                     info.maxLat = boundingBox.1.latitude

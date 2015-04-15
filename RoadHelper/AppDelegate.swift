@@ -20,6 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         MagicalRecord.setLoggingLevel(MagicalRecordLoggingLevel.Verbose)
         MagicalRecord.setShouldDeleteStoreOnModelMismatch(true)
         MagicalRecord.setupAutoMigratingCoreDataStack()
+        LocationManager.instance().askForLocationAccess()
         return true
     }
 

@@ -36,8 +36,7 @@ class GeoNameSearchTableViewController: UITableViewController,UISearchController
             |> start (next: {[weak self] value in
                 self?.searchDisplayController?.searchResultsTableView.reloadData()
             })
-        
-        self.searchDisplayController?.searchResultsTableView.registerClass(GeoSearchResultTableViewCell.self, forCellReuseIdentifier: "GeoSearchResultTableViewCell")
+        self.searchDisplayController?.searchResultsTableView.registerNib(UINib(nibName: "GeoSearchResultTableViewCell", bundle: nil), forCellReuseIdentifier: "GeoSearchResultTableViewCell")
     }
 
     override func viewWillAppear(animated: Bool) {
@@ -76,10 +75,66 @@ class GeoNameSearchTableViewController: UITableViewController,UISearchController
                 let cell = tableView.dequeueReusableCellWithIdentifier("GeoSearchResultTableViewCell", forIndexPath: indexPath) as! GeoSearchResultTableViewCell
                 if let geoObject = object["GeoObject"] as? Dictionary<String, AnyObject>{
                     if let name = geoObject["name"] as? String {
-                        cell.textLabel?.text = name
+                        cell.nameLabel?.text = name
                     }
                     if let description = geoObject["description"] as? String {
-                        cell.detailTextLabel?.text = description
+                        cell.descrLabel?.text = description
+                    }
+                    if let  lowerCornerString = ((geoObject["boundedBy"] as? Dictionary<String,AnyObject>)?["Envelope"] as? Dictionary<String,AnyObject>)?["lowerCorner"] as? String,
+                            upperCornerString = ((geoObject["boundedBy"] as? Dictionary<String,AnyObject>)?["Envelope"] as? Dictionary<String,AnyObject>)?["upperCorner"] as? String {
+                        
+                                let lowerCornerComponent = lowerCornerString.componentsSeparatedByString(" ")
+                                let upperCornerComponent = upperCornerString.componentsSeparatedByString(" ")
+                                let numberFormater = NSNumberFormatter()
+                                numberFormater.decimalSeparator = "."
+                                if let  lowerCornerLat =  numberFormater.numberFromString(lowerCornerComponent[1])?.doubleValue,
+                                        lowerCornerLon =  numberFormater.numberFromString(lowerCornerComponent[0])?.doubleValue,
+                                        upperCornerLat =  numberFormater.numberFromString(upperCornerComponent[1])?.doubleValue,
+                                        upperCornerLon =  numberFormater.numberFromString(upperCornerComponent[0])?.doubleValue {
+                                            
+                                        let lowerCorner = CLLocationCoordinate2D(latitude: lowerCornerLat, longitude: lowerCornerLon)
+                                        let upperCorner = CLLocationCoordinate2D(latitude: upperCornerLat, longitude: upperCornerLon)
+                                        let cellReuseSignal = cell.rac_prepareForReuseSignal.toSignalProducer()
+                                            |> map{ object -> () in
+                                                return
+                                            }
+                                            |> catch { _ in SignalProducer<(), NoError>.empty }
+                                        LocationManager.instance().lastLocation.producer
+                                            |> map({ object -> String in
+                                                if let point = object {
+                                                    let maxLat = upperCorner.latitude
+                                                    let minLat = lowerCorner.latitude
+                                                    let maxLon = upperCorner.longitude
+                                                    let minLon = lowerCorner.longitude
+                                                    let spanLat = maxLat - minLat
+                                                    let spanLon = maxLon - minLon
+                                                    let rect = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: minLat+(spanLat/2), longitude: minLon+(spanLon/2)), span: MKCoordinateSpan(latitudeDelta: spanLat, longitudeDelta: spanLon))
+                                                    let distance = LocationManager.calculateDistanceBetwen(rect, point: point)
+                                                    return "\(Int(distance))m"
+                                                    
+                                                }
+                                                return ""
+                                            })
+                                            |> takeUntil(cellReuseSignal)
+                                            |> start(next:{ (object:String) in
+                                                cell.distanceLabel.text = object
+                                            })
+                                        cell.button.rac_signalForControlEvents(UIControlEvents.TouchUpInside).toSignalProducer()
+                                            |> takeUntil(cellReuseSignal)
+                                            |> start(next:{[weak self] object in
+                                                let maxLat = upperCorner.latitude
+                                                let minLat = lowerCorner.latitude
+                                                let maxLon = upperCorner.longitude
+                                                let minLon = lowerCorner.longitude
+                                                let spanLat = maxLat - minLat
+                                                let spanLon = maxLon - minLon
+                                                let rect = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: minLat+(spanLat/2), longitude: minLon+(spanLon/2)), span: MKCoordinateSpan(latitudeDelta: spanLat, longitudeDelta: spanLon))
+                                                if let viewController = self?.storyboard?.instantiateViewControllerWithIdentifier("ShowMapRectViewController") as? ShowMapRectViewController{
+                                                    viewController.mapRect = rect
+                                                    self?.navigationController?.pushViewController(viewController, animated: true)
+                                                }
+                                            })
+                                }
                     }
                 }
                 // Configure the cell...
@@ -107,10 +162,10 @@ class GeoNameSearchTableViewController: UITableViewController,UISearchController
                                 let upperCornerComponent = upperCornerString.componentsSeparatedByString(" ")
                                 let numberFormater = NSNumberFormatter()
                                 numberFormater.decimalSeparator = "."
-                                if let  lowerCornerLat =  numberFormater.numberFromString(lowerCornerComponent[0])?.doubleValue,
-                                        lowerCornerLon =  numberFormater.numberFromString(lowerCornerComponent[1])?.doubleValue,
-                                        upperCornerLat =  numberFormater.numberFromString(upperCornerComponent[0])?.doubleValue,
-                                        upperCornerLon =  numberFormater.numberFromString(upperCornerComponent[1])?.doubleValue {
+                                if let  lowerCornerLat =  numberFormater.numberFromString(lowerCornerComponent[1])?.doubleValue,
+                                        lowerCornerLon =  numberFormater.numberFromString(lowerCornerComponent[0])?.doubleValue,
+                                        upperCornerLat =  numberFormater.numberFromString(upperCornerComponent[1])?.doubleValue,
+                                        upperCornerLon =  numberFormater.numberFromString(upperCornerComponent[0])?.doubleValue {
                                             let lowerCorner = CLLocationCoordinate2D(latitude: lowerCornerLat, longitude: lowerCornerLon)
                                             let upperCorner = CLLocationCoordinate2D(latitude: upperCornerLat, longitude: upperCornerLon)
                                             finishBlock?(name, (lowerCorner,upperCorner))
@@ -130,7 +185,14 @@ class GeoNameSearchTableViewController: UITableViewController,UISearchController
     class func searchSignal(testString:String) -> SignalProducer<Array<Dictionary<String,AnyObject>>, NoError>{
         let signal:SignalProducer<Array<Dictionary<String,AnyObject>>, NSError> = SignalProducer { observer, disposable in
             if let urlString = NSURL(string: "http://geocode-maps.yandex.ru/1.x/") {
-                request(.GET, urlString, parameters: ["ll":"37.618920,55.756994", "geocode": testString,"format":"json"]).responseJSON(completionHandler: { (request, response, object, error) -> Void in
+                let lastLocation:String
+                if let lastLocationCoorndinate = LocationManager.instance().lastLocation.value {
+                    lastLocation = "\(lastLocationCoorndinate.coordinate.longitude),\(lastLocationCoorndinate.coordinate.latitude)"
+                }
+                else{
+                    lastLocation = ""
+                }
+                request(.GET, urlString, parameters: ["ll":lastLocation, "geocode": testString,"format":"json"]).responseJSON(completionHandler: { (request, response, object, error) -> Void in
                     if let json = object as? Dictionary<String, AnyObject>{
                         if let members = (json["response"]?["GeoObjectCollection"] as? Dictionary<String, AnyObject>)?["featureMember"] as? Array<Dictionary<String, AnyObject>>{
                             sendNext(observer, members)

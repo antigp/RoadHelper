@@ -33,6 +33,8 @@
 		441C73C11AD7E2FB00CAE0FB /* RoadAddViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 441C73C01AD7E2FB00CAE0FB /* RoadAddViewController.swift */; };
 		441C73C41AD7E58A00CAE0FB /* RoadTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 441C73C31AD7E58A00CAE0FB /* RoadTableViewCell.swift */; };
 		441C73C81AD7F5CE00CAE0FB /* RoadInfoTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 441C73C71AD7F5CE00CAE0FB /* RoadInfoTableViewCell.swift */; };
+		44F950B51ADE70F0006B52ED /* GeoSearchResultTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 44F950B41ADE70F0006B52ED /* GeoSearchResultTableViewCell.xib */; };
+		44F950B81ADE7641006B52ED /* ShowMapRectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F950B71ADE7641006B52ED /* ShowMapRectViewController.swift */; };
 		D726E1E821049569291046F8 /* Pods.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DE38CDA3D9423A29AA7835FE /* Pods.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 /* End PBXBuildFile section */
 
@@ -80,6 +82,8 @@
 		441C73C31AD7E58A00CAE0FB /* RoadTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoadTableViewCell.swift; sourceTree = "<group>"; };
 		441C73C71AD7F5CE00CAE0FB /* RoadInfoTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoadInfoTableViewCell.swift; sourceTree = "<group>"; };
 		441C73E21AD80BC500CAE0FB /* RoadHelper-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RoadHelper-Bridging-Header.h"; sourceTree = "<group>"; };
+		44F950B41ADE70F0006B52ED /* GeoSearchResultTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GeoSearchResultTableViewCell.xib; sourceTree = "<group>"; };
+		44F950B71ADE7641006B52ED /* ShowMapRectViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShowMapRectViewController.swift; sourceTree = "<group>"; };
 		D4A8AFEA74520929873408E2 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		DE38CDA3D9423A29AA7835FE /* Pods.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -209,12 +213,10 @@
 		441C73C61AD7F5A000CAE0FB /* InfoViewController */ = {
 			isa = PBXGroup;
 			children = (
+				44F950B61ADE761D006B52ED /* Add */,
 				441024A91ADD7A51008BA20D /* RoadInfoListTableViewController.swift */,
 				441024AB1ADD8005008BA20D /* RoadInfoListTableViewCell.swift */,
 				441C73BE1AD7DF4000CAE0FB /* RoadInfoViewController.swift */,
-				4400369B1ADBD66A00991EC0 /* InfoAddViewController.swift */,
-				4400369F1ADBF6CF00991EC0 /* GeoNameSearchTableViewController.swift */,
-				440036A11ADC108600991EC0 /* GeoSearchResultTableViewCell.swift */,
 			);
 			name = InfoViewController;
 			sourceTree = "<group>";
@@ -229,6 +231,18 @@
 				441024A31ADD6F19008BA20D /* VoiceInfo.swift */,
 			);
 			name = Modeles;
+			sourceTree = "<group>";
+		};
+		44F950B61ADE761D006B52ED /* Add */ = {
+			isa = PBXGroup;
+			children = (
+				4400369B1ADBD66A00991EC0 /* InfoAddViewController.swift */,
+				4400369F1ADBF6CF00991EC0 /* GeoNameSearchTableViewController.swift */,
+				440036A11ADC108600991EC0 /* GeoSearchResultTableViewCell.swift */,
+				44F950B41ADE70F0006B52ED /* GeoSearchResultTableViewCell.xib */,
+				44F950B71ADE7641006B52ED /* ShowMapRectViewController.swift */,
+			);
+			name = Add;
 			sourceTree = "<group>";
 		};
 		A9113A057182CCFE891E4D55 /* Pods */ = {
@@ -331,6 +345,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				44F950B51ADE70F0006B52ED /* GeoSearchResultTableViewCell.xib in Resources */,
 				441C73A01AD7D7B900CAE0FB /* Main.storyboard in Resources */,
 				441C73A51AD7D7BA00CAE0FB /* LaunchScreen.xib in Resources */,
 				441C73A21AD7D7BA00CAE0FB /* Images.xcassets in Resources */,
@@ -413,6 +428,7 @@
 				4400368E1ADBCCD100991EC0 /* RoadSplitViewController.swift in Sources */,
 				441C73BD1AD7DF2500CAE0FB /* RoadTableViewController.swift in Sources */,
 				441C73BF1AD7DF4100CAE0FB /* RoadInfoViewController.swift in Sources */,
+				44F950B81ADE7641006B52ED /* ShowMapRectViewController.swift in Sources */,
 				440036A21ADC108600991EC0 /* GeoSearchResultTableViewCell.swift in Sources */,
 				4400369C1ADBD66A00991EC0 /* InfoAddViewController.swift in Sources */,
 				440036A61ADC135A00991EC0 /* RAC+UISearchBar.m in Sources */,

@@ -63,4 +63,11 @@ class LocationManager:NSObject,CLLocationManagerDelegate{
     func locationManager(manager: CLLocationManager!, didUpdateToLocation newLocation: CLLocation!, fromLocation oldLocation: CLLocation!) {
         lastLocation.value = newLocation
     }
+    
+    class func calculateDistanceBetwen(rect:MKCoordinateRegion, point:CLLocation) -> CLLocationDistance {
+        let x = max(min(point.coordinate.latitude,rect.center.latitude+(rect.span.latitudeDelta/2)),rect.center.latitude-(rect.span.latitudeDelta/2))
+        let y = max(min(point.coordinate.longitude,rect.center.longitude+(rect.span.longitudeDelta/2)),rect.center.longitude-(rect.span.longitudeDelta/2))
+        let closestPoint = CLLocation(latitude: x, longitude: y)
+        return closestPoint.distanceFromLocation(point)
+    }
 }

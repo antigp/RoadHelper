@@ -16,8 +16,8 @@ class RoadInfoViewController: UIViewController {
         if let splitViewController = self.splitViewController as? RoadSplitViewController {
             road = splitViewController.road
         }
-        navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem()
-        navigationItem.leftItemsSupplementBackButton = true
+        //navigationItem.leftBarButtonItem = splitViewController?.displayModeButtonItem()
+        //navigationItem.leftItemsSupplementBackButton = true
         // Do any additional setup after loading the view.
     }
 

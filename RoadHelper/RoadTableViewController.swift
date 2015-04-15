@@ -26,7 +26,6 @@ class RoadTableViewController: UITableViewController, NSFetchedResultsController
         if let splitViewController = self.splitViewController as? RoadSplitViewController {
             road = splitViewController.road
         }
-        splitViewController?.delegate = self
         
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
