@@ -218,6 +218,13 @@ class RoadInfoListTableViewController: UITableViewController,NSFetchedResultsCon
                 voicePlayer?.delegate = self
                 voicePlayer?.play()
             }
+            else{
+                if let infoViewController = self.storyboard?.instantiateViewControllerWithIdentifier("InfoAddViewController") as? InfoAddViewController {
+                    infoViewController.info = info
+                    infoViewController.road = info.klm.road
+                    self.navigationController?.pushViewController(infoViewController, animated:false)
+                }
+            }
         }
     }
     

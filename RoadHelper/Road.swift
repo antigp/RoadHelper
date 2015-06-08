@@ -12,7 +12,6 @@ import CoreData
 class Road: NSManagedObject {
 
     @NSManaged var name: String
-    @NSManaged var totalKLM: NSNumber
     @NSManaged var klms: NSSet
 
 }

@@ -82,6 +82,7 @@ class RoadTableViewController: UITableViewController, NSFetchedResultsController
                     cell.infoWithPhoto.text = "\(allInfosArray.filter({$0.voice != nil}).count)"
                 }
                 cell.firstInfoName.text = "\(roadInfo.name)"
+                cell.firstInfoText.text = "\(roadInfo.descr)"
                 let cellReuseSignal = cell.rac_prepareForReuseSignal.toSignalProducer()
                     |> map{ object -> () in
                         return

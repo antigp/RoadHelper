@@ -11,8 +11,9 @@ import ReactiveCocoa
 import CoreLocation
 import MagicalRecord
 
-class InfoAddViewController: UIViewController,UIPickerViewDelegate, UIPickerViewDataSource, UITextViewDelegate {
+class InfoAddViewController: UIViewController, UITextViewDelegate, UITextFieldDelegate {
     var road:Road?
+    var info:Info?
     var name = MutableProperty("")
     var boundingBox = MutableProperty(Optional<(CLLocationCoordinate2D,CLLocationCoordinate2D)>.None)
     var geoPoint = MutableProperty(Optional<CLLocationCoordinate2D>.None)
@@ -23,11 +24,28 @@ class InfoAddViewController: UIViewController,UIPickerViewDelegate, UIPickerView
     @IBOutlet weak var geoButton:UIButton!
     @IBOutlet weak var imageButton:UIButton!
     @IBOutlet weak var descrView:UITextView!
-    @IBOutlet weak var klmPicker:UIPickerView!
+    @IBOutlet weak var selectedKlm:UITextField!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
+        selectedKlm.text = "\(info?.klm.klm ?? String())"
+        self.name.value = info?.name ?? ""
+        self.descrView.text =  info?.descr ?? ""
+        if let minLat = info?.minLat?.doubleValue,
+               minLon = info?.minLon?.doubleValue,
+               maxLat = info?.maxLat?.doubleValue,
+               maxLon = info?.maxLon?.doubleValue {
+            let min = CLLocationCoordinate2DMake(minLat,minLon)
+            let max = CLLocationCoordinate2DMake(maxLat,maxLon)
+            boundingBox.value = (min, max)
+        }
+
+        if let lat = info?.lat?.doubleValue, lon = info?.lon?.doubleValue {
+            let value = CLLocationCoordinate2DMake(lat,lon)
+            self.geoPoint.value = value
+        }
+
         if let splitViewController = self.splitViewController as? RoadSplitViewController {
             road = splitViewController.road
         }
@@ -75,18 +93,12 @@ class InfoAddViewController: UIViewController,UIPickerViewDelegate, UIPickerView
         // Dispose of any resources that can be recreated.
     }
     
-    
-    func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return Int(road?.totalKLM ?? 0)
-    }
+
     
     func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
         return 1
     }
-    
-    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String! {
-        return "\(row) km."
-    }
+
 
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if let geoNameSearch = segue.destinationViewController as? GeoNameSearchTableViewController{
@@ -132,23 +144,29 @@ class InfoAddViewController: UIViewController,UIPickerViewDelegate, UIPickerView
         }
         return true
     }
-    
+
+
     @IBAction func doneButtonPressed(){
         MagicalRecord.saveWithBlock({[weak self] (context) -> Void in
             if let road = self?.road?.MR_inContext(context) {
-                
-                
-                let info = Info.MR_createEntityInContext(context)
-                let kilometer:Kilometr
-                let predicate = NSPredicate(format: "klm = %@ AND road = %@", argumentArray: [NSNumber(long: self?.klmPicker.selectedRowInComponent(0) ?? 0), road])
-                if let findedKilometer = Kilometr.MR_findFirstWithPredicate(predicate, inContext: context){
-                    kilometer = findedKilometer
+                let info:Info
+                if let privateInfo = self?.info {
+                    info = privateInfo.MR_inContext(context)
                 }
-                else{
+                else {
+                    info = Info.MR_createEntityInContext(context)
+                }
+                let kilometer: Kilometr
+                let klmNumber = NSNumber(long: self?.selectedKlm.text?.toInt() ?? 0)
+                let predicate = NSPredicate(format: "klm = %@ AND road = %@", argumentArray: [klmNumber, road])
+                if let findedKilometer = Kilometr.MR_findFirstWithPredicate(predicate, inContext: context) {
+                    kilometer = findedKilometer
+                } else {
                     kilometer = Kilometr.MR_createEntityInContext(context)
                     kilometer.road = road
-                    kilometer.klm = NSNumber(long: self?.klmPicker.selectedRowInComponent(0) ?? 0)
+                    kilometer.klm = klmNumber
                 }
+
                 let predicateSort = NSPredicate(format: "klm = %@", argumentArray: [kilometer])
                 if let maxSortInfo = Info.MR_findFirstWithPredicate(predicateSort, sortedBy: "sort", ascending: false) {
                     info.sort = NSNumber(long: maxSortInfo.sort.longValue + 1)

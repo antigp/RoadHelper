@@ -13,10 +13,8 @@ class RoadTableViewCell: UITableViewCell {
         didSet{
             if let road = road{
                 self.routeLabel.text = road.name
-                self.kmLabel.text = "\(road.totalKLM) km."
             }
         }
     }
     @IBOutlet weak var routeLabel:UILabel!
-    @IBOutlet weak var kmLabel:UILabel!
 }

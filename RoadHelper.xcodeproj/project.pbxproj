@@ -84,6 +84,7 @@
 		441C73C31AD7E58A00CAE0FB /* RoadTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoadTableViewCell.swift; sourceTree = "<group>"; };
 		441C73C71AD7F5CE00CAE0FB /* RoadInfoTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoadInfoTableViewCell.swift; sourceTree = "<group>"; };
 		441C73E21AD80BC500CAE0FB /* RoadHelper-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "RoadHelper-Bridging-Header.h"; sourceTree = "<group>"; };
+		44BFDA211B25DA8F00B06FD6 /* RoadHelper_2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = RoadHelper_2.xcdatamodel; sourceTree = "<group>"; };
 		44F950B41ADE70F0006B52ED /* GeoSearchResultTableViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GeoSearchResultTableViewCell.xib; sourceTree = "<group>"; };
 		44F950B71ADE7641006B52ED /* ShowMapRectViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShowMapRectViewController.swift; sourceTree = "<group>"; };
 		44F950B91ADEA5E9006B52ED /* AddGeoViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddGeoViewController.swift; sourceTree = "<group>"; };
@@ -589,6 +590,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CURRENT_PROJECT_VERSION = 2;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -598,6 +600,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "RoadHelper-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
 		};
@@ -608,6 +611,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "iOS Distribution: EVGENIY ANTROPOV";
+				CURRENT_PROJECT_VERSION = 2;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -617,6 +621,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "8eaf38f6-4e82-4589-ac2a-a7d0b6f27819";
 				SWIFT_OBJC_BRIDGING_HEADER = "RoadHelper-Bridging-Header.h";
+				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
 		};
@@ -690,9 +695,10 @@
 		441C73991AD7D7B700CAE0FB /* RoadHelper.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				44BFDA211B25DA8F00B06FD6 /* RoadHelper_2.xcdatamodel */,
 				441C739A1AD7D7B700CAE0FB /* RoadHelper.xcdatamodel */,
 			);
-			currentVersion = 441C739A1AD7D7B700CAE0FB /* RoadHelper.xcdatamodel */;
+			currentVersion = 44BFDA211B25DA8F00B06FD6 /* RoadHelper_2.xcdatamodel */;
 			path = RoadHelper.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

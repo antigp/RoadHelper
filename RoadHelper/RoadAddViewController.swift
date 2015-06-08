@@ -13,8 +13,7 @@ class RoadAddViewController: UIViewController {
     var road:Road?
     
     @IBOutlet weak var nameTextField:UITextField!
-    @IBOutlet weak var countTextField:UITextField!
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -34,7 +33,6 @@ extension RoadAddViewController{
             if let sself = self{
                 let road = Road.MR_createEntityInContext(context)
                 road.name = sself.nameTextField.text
-                road.totalKLM = NSNumber(unsignedLong: UInt(sself.countTextField.text.toInt() ?? 0))
             }
         }, completion: {[weak self] (success, error) -> Void in
             if success == true {

@@ -15,6 +15,7 @@ class RoadInfoTableViewCell: UITableViewCell {
     @IBOutlet weak var infoWithGeoPoint:UILabel!
     @IBOutlet weak var infoWithPhoto:UILabel!
     @IBOutlet weak var firstInfoName:UILabel!
+    @IBOutlet weak var firstInfoText:UILabel!
     @IBOutlet weak var firstInfoRectDistance:UILabel!
     @IBOutlet weak var firstInfoPointDistance:UILabel!
     
