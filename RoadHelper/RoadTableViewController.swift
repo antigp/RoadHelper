@@ -23,12 +23,18 @@ class RoadTableViewController: UITableViewController, NSFetchedResultsController
                 self.fetchedController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: NSManagedObjectContext.MR_defaultContext(), sectionNameKeyPath: "klm.klm", cacheName: nil)
                 self.fetchedController?.delegate = self
                 self.fetchedController?.performFetch(nil)
+                let nameRequest = NSFetchRequest(entityName: "Road")
+                nameRequest.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
+                self.roadNameFetchedController = NSFetchedResultsController(fetchRequest: nameRequest, managedObjectContext: NSManagedObjectContext.MR_defaultContext(), sectionNameKeyPath: nil, cacheName: nil)
+                self.roadNameFetchedController?.delegate = self
+                self.roadNameFetchedController?.performFetch(nil)
                 self.tableView.reloadData()
             }
         }
     }
     var fetchedController:NSFetchedResultsController?
-    
+    var roadNameFetchedController:NSFetchedResultsController?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         if let splitViewController = self.splitViewController as? RoadSplitViewController {
@@ -146,16 +152,23 @@ class RoadTableViewController: UITableViewController, NSFetchedResultsController
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         switch(indexPath.section){
-        case 1:
-            let newIndexPath = NSIndexPath(forItem: 0, inSection: indexPath.item)
-            if let roadInfo = fetchedController?.objectAtIndexPath(newIndexPath) as? Info {
-                if let infoListViewController = self.storyboard?.instantiateViewControllerWithIdentifier("RoadInfoListNavigationViewController") as? UINavigationController {
-                    if let viewController = infoListViewController.viewControllers.first as? RoadInfoListTableViewController {
-                        viewController.klm = roadInfo.klm
-                        splitViewController?.showDetailViewController(infoListViewController, sender: nil)
+            case 0:
+                if let infoListViewController = self.storyboard?.instantiateViewControllerWithIdentifier("RoadAddViewController") as? RoadAddViewController {
+                    let navigationController = UINavigationController(rootViewController:infoListViewController)
+                    infoListViewController.road = self.road
+                    splitViewController?.showDetailViewController(navigationController, sender: nil)
+                }
+
+            case 1:
+                let newIndexPath = NSIndexPath(forItem: 0, inSection: indexPath.item)
+                if let roadInfo = fetchedController?.objectAtIndexPath(newIndexPath) as? Info {
+                    if let infoListViewController = self.storyboard?.instantiateViewControllerWithIdentifier("RoadInfoListNavigationViewController") as? UINavigationController {
+                        if let viewController = infoListViewController.viewControllers.first as? RoadInfoListTableViewController {
+                            viewController.klm = roadInfo.klm
+                            splitViewController?.showDetailViewController(infoListViewController, sender: nil)
+                        }
                     }
                 }
-            }
         default:
             println()
         }

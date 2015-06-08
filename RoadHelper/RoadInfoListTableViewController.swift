@@ -165,14 +165,16 @@ class RoadInfoListTableViewController: UITableViewController,NSFetchedResultsCon
         return true
     }
 
-    @IBAction func startRecordVoice(){
+    @IBAction func startRecordVoice(sender:UIButton){
         AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryRecord, error: nil)
         avAudioRecorder.record()
+        sender.backgroundColor = UIColor.redColor()
     }
     
-    @IBAction func stopRecordVoice(){
+    @IBAction func stopRecordVoice(sender:UIButton){
         avAudioRecorder.stop()
-         AVAudioSession.sharedInstance().setCategory(nil, error: nil)
+        AVAudioSession.sharedInstance().setCategory(nil, error: nil)
+        sender.backgroundColor = UIColor.greenColor()
     }
     
     func audioRecorderDidFinishRecording(recorder: AVAudioRecorder!, successfully flag: Bool) {

@@ -16,7 +16,7 @@ class RoadAddViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        self.nameTextField.text = road?.name ?? ""
         // Do any additional setup after loading the view.
     }
 
@@ -30,9 +30,12 @@ class RoadAddViewController: UIViewController {
 extension RoadAddViewController{
     @IBAction func saveButtonPressed(){
         MagicalRecord.saveWithBlock({[weak self] (context) -> Void in
-            if let sself = self{
-                let road = Road.MR_createEntityInContext(context)
+            if let road = self?.road, sself = self{
                 road.name = sself.nameTextField.text
+            }
+            else{
+                let road = Road.MR_createEntityInContext(context)
+                road.name = self?.nameTextField.text ?? String()
             }
         }, completion: {[weak self] (success, error) -> Void in
             if success == true {
