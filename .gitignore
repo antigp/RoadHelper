@@ -31,3 +31,10 @@ Pods/
 # Carthage/Checkouts
 
 Carthage/Build
+.idea/.name
+.idea/encodings.xml
+.idea/modules.xml
+.idea/RoadHelper.iml
+.idea/vcs.xml
+.idea/xcode.xml
+.idea/scopes/scope_settings.xml
