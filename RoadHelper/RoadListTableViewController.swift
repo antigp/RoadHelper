@@ -18,7 +18,7 @@ class RoadListTableViewController: UITableViewController,NSFetchedResultsControl
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        self.navigationItem.rightBarButtonItem = self.editButtonItem()
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
@@ -58,6 +58,16 @@ class RoadListTableViewController: UITableViewController,NSFetchedResultsControl
     
     func controllerDidChangeContent(controller: NSFetchedResultsController) {
         self.tableView.reloadData()
+    }
+    
+    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+        if editingStyle == .Delete {
+            MagicalRecord.saveWithBlock({[weak self] (context) -> Void in
+                if let object = self?.fetchedController.objectAtIndexPath(indexPath) as? Road{
+                    object.MR_deleteEntityInContext(context)
+                }
+            })
+        }
     }
     
     /*

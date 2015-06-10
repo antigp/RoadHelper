@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="7701" systemVersion="14D136" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="Info" representedClassName="RoadHelper.Info" syncable="YES">
+        <attribute name="descr" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="lat" optional="YES" attributeType="Float" syncable="YES"/>
+        <attribute name="lon" optional="YES" attributeType="Float" syncable="YES"/>
+        <attribute name="maxLat" optional="YES" attributeType="Float" syncable="YES"/>
+        <attribute name="maxLon" optional="YES" attributeType="Float" syncable="YES"/>
+        <attribute name="minLat" optional="YES" attributeType="Float" syncable="YES"/>
+        <attribute name="minLon" optional="YES" attributeType="Float" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="sort" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <relationship name="klm" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Kilometr" inverseName="infos" inverseEntity="Kilometr" syncable="YES"/>
+        <relationship name="photo" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="PhotoInfo" inverseName="info" inverseEntity="PhotoInfo" syncable="YES"/>
+        <relationship name="voice" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="VoiceInfo" inverseName="info" inverseEntity="VoiceInfo" syncable="YES"/>
+    </entity>
+    <entity name="Kilometr" representedClassName="RoadHelper.Kilometr" syncable="YES">
+        <attribute name="klm" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <relationship name="infos" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Info" inverseName="klm" inverseEntity="Info" syncable="YES"/>
+        <relationship name="road" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Road" inverseName="klms" inverseEntity="Road" syncable="YES"/>
+        <relationship name="voices" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="VoiceInfo" syncable="YES"/>
+    </entity>
+    <entity name="PhotoInfo" representedClassName="RoadHelper.PhotoInfo" syncable="YES">
+        <attribute name="imageData" optional="YES" attributeType="Binary" syncable="YES"/>
+        <relationship name="info" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Info" inverseName="photo" inverseEntity="Info" syncable="YES"/>
+    </entity>
+    <entity name="Road" representedClassName="RoadHelper.Road" syncable="YES">
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="klms" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="Kilometr" inverseName="road" inverseEntity="Kilometr" syncable="YES"/>
+    </entity>
+    <entity name="VoiceInfo" representedClassName="RoadHelper.VoiceInfo" syncable="YES">
+        <attribute name="recordedVoice" optional="YES" attributeType="Binary" syncable="YES"/>
+        <relationship name="info" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Info" inverseName="voice" inverseEntity="Info" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="Info" positionX="-45" positionY="0" width="128" height="225"/>
+        <element name="Kilometr" positionX="-18" positionY="99" width="128" height="105"/>
+        <element name="PhotoInfo" positionX="27" positionY="90" width="128" height="75"/>
+        <element name="Road" positionX="-63" positionY="-18" width="128" height="75"/>
+        <element name="VoiceInfo" positionX="-27" positionY="36" width="128" height="75"/>
+    </elements>
+</model>

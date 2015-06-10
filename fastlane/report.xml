@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites name="fastlane">
   <testsuite name="deploy">
-    <testcase name="0: fastlane_version" time="0.000162"/>
-    <testcase name="1: default_platform" time="2.5e-05"/>
-    <testcase name="2: cocoapods" time="13.288211"/>
-    <testcase name="3: increment_build_number" time="1.219683"/>
-    <testcase name="4: ipa" time="404.020457"/>
-    <testcase name="5: produce" time="97.712376">
-      <failure message="/Library/Ruby/Gems/2.0.0/gems/fastlane-1.3.2/lib/fastlane/actions/actions_helper.rb:50:in `execute_action'&#10;/Library/Ruby/Gems/2.0.0/gems/fastlane-1.3.2/lib/fastlane/fast_file.rb:94:in `block in method_missing'&#10;/Library/Ruby/Gems/2.0.0/gems/fastlane-1.3.2/lib/fastlane/fast_file.rb:93:in `chdir'&#10;/Library/Ruby/Gems/2.0.0/gems/fastlane-1.3.2/lib/fastlane/fast_file.rb:93:in `method_missing'&#10;(eval):47:in `block (3 levels) in parse'&#10;/Library/Ruby/Gems/2.0.0/gems/fastlane-1.3.2/lib/fastlane/runner.rb:35:in `call'&#10;/Library/Ruby/Gems/2.0.0/gems/fastlane-1.3.2/lib/fastlane/runner.rb:35:in `block in execute'&#10;/Library/Ruby/Gems/2.0.0/gems/fastlane-1.3.2/lib/fastlane/runner.rb:25:in `chdir'&#10;/Library/Ruby/Gems/2.0.0/gems/fastlane-1.3.2/lib/fastlane/runner.rb:25:in `execute'&#10;/Library/Ruby/Gems/2.0.0/gems/fastlane-1.3.2/lib/fastlane/lane_manager.rb:33:in `cruise_lane'&#10;/Library/Ruby/Gems/2.0.0/gems/fastlane-1.3.2/bin/fastlane:39:in `block (2 levels) in run'&#10;/Library/Ruby/Gems/2.0.0/gems/commander-4.3.4/lib/commander/command.rb:178:in `call'&#10;/Library/Ruby/Gems/2.0.0/gems/commander-4.3.4/lib/commander/command.rb:178:in `call'&#10;/Library/Ruby/Gems/2.0.0/gems/commander-4.3.4/lib/commander/command.rb:153:in `run'&#10;/Library/Ruby/Gems/2.0.0/gems/commander-4.3.4/lib/commander/runner.rb:428:in `run_active_command'&#10;/Library/Ruby/Gems/2.0.0/gems/commander-4.3.4/lib/commander/runner.rb:68:in `run!'&#10;/Library/Ruby/Gems/2.0.0/gems/commander-4.3.4/lib/commander/delegates.rb:15:in `run!'&#10;/Library/Ruby/Gems/2.0.0/gems/fastlane-1.3.2/bin/fastlane:118:in `run'&#10;/Library/Ruby/Gems/2.0.0/gems/fastlane-1.3.2/bin/fastlane:124:in `&lt;top (required)&gt;'&#10;/usr/bin/fastlane:23:in `load'&#10;/usr/bin/fastlane:23:in `&lt;main&gt;'&#10;&#10;Unable to find field &quot;accountname&quot;"/>
-    </testcase>
+    <testcase name="0: opt_out_usage" time="8.9e-05"/>
+    <testcase name="1: update_fastlane" time="0.231809"/>
+    <testcase name="2: fastlane_version" time="0.000144"/>
+    <testcase name="3: default_platform" time="5.3e-05"/>
+    <testcase name="4: cocoapods" time="59.673077"/>
+    <testcase name="5: increment_build_number" time="3.065046"/>
+    <testcase name="6: cert" time="27.060675"/>
+    <testcase name="7: sigh" time="26.803007"/>
+    <testcase name="8: ipa" time="463.878706"/>
+    <testcase name="9: produce" time="38.989656"/>
+    <testcase name="10: deliver" time="628.589407"/>
   </testsuite>
 </testsuites>

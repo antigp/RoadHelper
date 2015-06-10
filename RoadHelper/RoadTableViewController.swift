@@ -80,7 +80,7 @@ class RoadTableViewController: UITableViewController, NSFetchedResultsController
             let newIndexPath = NSIndexPath(forItem: 0, inSection: indexPath.item)
             if let roadInfo = fetchedController?.objectAtIndexPath(newIndexPath) as? Info {
                 let cell = tableView.dequeueReusableCellWithIdentifier("RoadInfoTableViewCell", forIndexPath: indexPath) as! RoadInfoTableViewCell
-                cell.routeKilometerLabel.text = "\(roadInfo.klm.klm) klm."
+                cell.routeKilometerLabel.text = "\(roadInfo.klm.klm) km."
                 cell.totalInfo.text = "\(roadInfo.klm.infos.count)"
                 if let allInfosArray = roadInfo.klm.infos.allObjects as? [Info] {
                     cell.infoWithGeoRect.text = "\(allInfosArray.filter({$0.minLat != nil}).count)"
@@ -174,6 +174,18 @@ class RoadTableViewController: UITableViewController, NSFetchedResultsController
         }
         
     }
+    
+    // Override to support editing the table view.
+    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
+        if editingStyle == .Delete {
+            MagicalRecord.saveWithBlock({[weak self] (context) -> Void in
+                if let object = self?.fetchedController?.objectAtIndexPath(indexPath) as? Info{
+                    object.klm.MR_deleteEntityInContext(context)
+                }
+            })
+        }
+    }
+
     
     /*
     // Override to support conditional editing of the table view.

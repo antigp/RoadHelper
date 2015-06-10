@@ -38,3 +38,6 @@ Carthage/Build
 .idea/vcs.xml
 .idea/xcode.xml
 .idea/scopes/scope_settings.xml
+*.mobileprovision
+*.dSYM.zip
+fastlane/*.png

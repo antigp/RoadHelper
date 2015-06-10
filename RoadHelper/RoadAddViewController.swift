@@ -30,7 +30,7 @@ class RoadAddViewController: UIViewController {
 extension RoadAddViewController{
     @IBAction func saveButtonPressed(){
         MagicalRecord.saveWithBlock({[weak self] (context) -> Void in
-            if let road = self?.road, sself = self{
+            if let road = self?.road?.MR_inContext(context), sself = self{
                 road.name = sself.nameTextField.text
             }
             else{
@@ -40,6 +40,13 @@ extension RoadAddViewController{
         }, completion: {[weak self] (success, error) -> Void in
             if success == true {
                 self?.navigationController?.popViewControllerAnimated(true)
+//                if let splitVC = self?.splitViewController {
+//                    let barButtonItem = splitVC.displayModeButtonItem()
+//                    UIApplication.sharedApplication().sendAction(Selector("toggleMasterVisible:"), to: splitVC, from: nil, forEvent: nil)
+////                    splitVC.preferredDisplayMode = .PrimaryHidden
+////                    splitVC.preferredDisplayMode = .Automatic
+//////                    UIApplication.sharedApplication().sendAction(self!.navigationItem.leftBarButtonItem!.action, to: self!.navigationItem.leftBarButtonItem!.target, from: nil, forEvent: nil)
+//                }
             }
         })
         
